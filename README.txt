@@ -17,7 +17,7 @@ There are really 5 steps to setting it up with your projects.
 2. Install the sorting middleware. Your settings file might look something
    like::
    
-       MIDDLEWARE_CLASSES = (
+       MIDDLEWARE = (
            # ...
            'django_sorting.middleware.SortingMiddleware',
        )
