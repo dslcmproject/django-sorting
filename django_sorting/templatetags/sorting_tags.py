@@ -19,9 +19,9 @@ def anchor(parser, token):
     """
     Parses a tag that's supposed to be in this format: {% anchor field title %}    
     """
-    bits = [b.strip('"\'') for b in token.split_contents()]
+    bits = token.split_contents()
     if len(bits) < 2:
-        raise TemplateSyntaxError("anchor tag takes at least 1 argument")
+        raise template.TemplateSyntaxError("anchor tag takes at least 1 argument")
     try:
         title = bits[2]
     except IndexError:
@@ -78,9 +78,21 @@ class SortAnchorNode(template.Node):
 
 def autosort(parser, token):
     bits = [b.strip('"\'') for b in token.split_contents()]
-    if len(bits) != 2:
-        raise TemplateSyntaxError("autosort tag takes exactly one argument")
-    return SortedDataNode(bits[1])
+    if len(bits) not in (2, 4):
+        raise template.TemplateSyntaxError("autosort tag takes exactly one argument")
+    try:
+        if bits[2] != 'as':
+            raise template.TemplateSyntaxError(
+                "Context variable assignment must take the form of {%% %s"
+                " queryset as context_var_name %%}" % bits[0]
+            )
+    except IndexError:
+        pass
+    try:
+        return SortedDataNode(bits[1], bits[-1])
+    except IndexError:
+        return SortedDataNode(bits[1])
+
 
 class SortedDataNode(template.Node):
     """
@@ -91,7 +103,10 @@ class SortedDataNode(template.Node):
         self.context_var = context_var
 
     def render(self, context):
-        key = self.queryset_var.var
+        if self.context_var is None:
+            key = self.queryset_var.var
+        else:
+            key = self.context_var
         value = self.queryset_var.resolve(context)
         order_by = context['request'].field
         if len(order_by) > 1:

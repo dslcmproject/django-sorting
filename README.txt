@@ -66,4 +66,33 @@ your objects_list:
 
 That's it!  
 
+7. Example of using django-sorting, django-filter and django-pagination together [@lukeman]
 
+    {% load pagination_tags %}
+    {% load sorting_tags %}
+
+    {% block body %}
+
+    {% autosort filter.qs as sorted_objects %}
+    {% autopaginate sorted_objects 10 as object_list %}
+
+    {% for object in object_list %}
+        {{ object }}
+    {% endfor %}
+
+    {% paginate %}
+
+    {% endblock %}
+
+    {% block sidebar %}
+        <div class="filter">
+          <h2>Sort by</h2>
+          <ul>
+            <li>{% anchor firstfield "First Field" %}</li>
+            <li>{% anchor otherfield "Other Field" %}</li>
+          </ul>
+          <form action="" method="get" class="filter">
+            {{ filter.form.as_p }}
+          </form>
+        </div>
+    {% endblock %}
