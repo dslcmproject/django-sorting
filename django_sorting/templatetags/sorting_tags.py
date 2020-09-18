@@ -26,6 +26,10 @@ def anchor(parser, token):
         title = bits[2]
     except IndexError:
         title = bits[1].capitalize()
+
+    if (title[0] == title[-1] and title[0] in ('"', "'")):
+        title = title[1:-1]
+
     return SortAnchorNode(bits[1].strip(), title.strip())
     
 
